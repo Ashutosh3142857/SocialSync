@@ -77,8 +77,19 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
       scheduledFor.setHours(hours, minutes);
     }
     
+    // Make sure we have the latest mediaUrls from selectedMedia
+    const mediaUrls = selectedMedia.map(file => file.name);
+    
+    // Log the data we're about to submit for debugging
+    console.log("Submitting post data:", {
+      ...data,
+      mediaUrls,
+      scheduledFor: scheduledFor || null,
+    });
+    
     createPostMutation.mutate({
       ...data,
+      mediaUrls,
       scheduledFor: scheduledFor || null,
     });
   };

@@ -63,7 +63,11 @@ export function QuickActions() {
             </div>
             <h3 className="mt-3 text-lg font-medium text-gray-900">Connect Account</h3>
             <p className="mt-1 text-sm text-gray-500">Add a new social media account</p>
-            <Button className="mt-4" variant="outline" className="bg-green-500 hover:bg-green-600 text-white" asChild>
+            <Button 
+              className="mt-4 bg-green-500 hover:bg-green-600 text-white" 
+              variant="outline" 
+              asChild
+            >
               <Link href="/connections">Connect Now</Link>
             </Button>
           </CardContent>
