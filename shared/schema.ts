@@ -116,7 +116,7 @@ export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
 // Helper schemas for frontend validation
 export const postFormSchema = z.object({
   content: z.string().min(1, "Content is required").max(2200, "Content too long"),
-  mediaUrls: z.string().array().optional(),
+  mediaUrls: z.array(z.string()).optional().default([]),
   platforms: z.array(z.number()).min(1, "Select at least one platform"),
   scheduledFor: z.date().optional().nullable(),
 });

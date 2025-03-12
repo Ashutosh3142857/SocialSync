@@ -344,8 +344,16 @@ export class MemStorage implements IStorage {
   // Post operations
   async createPost(post: InsertPost): Promise<Post> {
     const id = this.postCurrentId++;
-    const createdAt = post.createdAt || new Date();
-    const newPost: Post = { ...post, id, createdAt };
+    const createdAt = new Date();
+    const newPost: Post = { 
+      id,
+      userId: post.userId,
+      content: post.content,
+      mediaUrls: post.mediaUrls || null,
+      status: post.status || "draft",
+      scheduledFor: post.scheduledFor || null,
+      createdAt
+    };
     this.posts.set(id, newPost);
     return newPost;
   }
@@ -396,7 +404,16 @@ export class MemStorage implements IStorage {
   // Platform post operations
   async createPlatformPost(platformPost: InsertPlatformPost): Promise<PlatformPost> {
     const id = this.platformPostCurrentId++;
-    const newPlatformPost: PlatformPost = { ...platformPost, id };
+    const newPlatformPost: PlatformPost = { 
+      id,
+      postId: platformPost.postId,
+      socialAccountId: platformPost.socialAccountId,
+      platformStatus: platformPost.platformStatus || "pending",
+      platformPostId: platformPost.platformPostId || null,
+      platformPostUrl: platformPost.platformPostUrl || null,
+      publishedAt: platformPost.publishedAt || null,
+      metrics: platformPost.metrics || {}
+    };
     this.platformPosts.set(id, newPlatformPost);
     return newPlatformPost;
   }
