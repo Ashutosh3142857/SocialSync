@@ -158,8 +158,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log("Validation error:", JSON.stringify(error.errors, null, 2));
+        console.log("Request body:", JSON.stringify(req.body, null, 2));
         return res.status(400).json({ message: "Invalid post data", errors: error.errors });
       }
+      console.log("Server error:", error);
       res.status(500).json({ message: "Failed to create post" });
     }
   });

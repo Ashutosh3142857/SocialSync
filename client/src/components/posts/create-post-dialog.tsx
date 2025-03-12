@@ -78,18 +78,23 @@ export function CreatePostDialog({ open, onOpenChange }: CreatePostDialogProps) 
     }
     
     // Make sure we have the latest mediaUrls from selectedMedia
-    const mediaUrls = selectedMedia.map(file => file.name);
+    const mediaUrls = selectedMedia.length > 0 
+      ? selectedMedia.map(file => file.name) 
+      : []; // Ensure it's an empty array if no media selected
     
     // Log the data we're about to submit for debugging
     console.log("Submitting post data:", {
-      ...data,
-      mediaUrls,
+      content: data.content,
+      platforms: data.platforms,
+      mediaUrls: mediaUrls,
       scheduledFor: scheduledFor || null,
     });
     
+    // Create a clean object instead of spreading to avoid unexpected properties
     createPostMutation.mutate({
-      ...data,
-      mediaUrls,
+      content: data.content,
+      platforms: data.platforms,
+      mediaUrls: mediaUrls,
       scheduledFor: scheduledFor || null,
     });
   };
