@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { SocialBadge } from "@/components/ui/social-icon";
+import { SocialBadge, SocialIcon } from "@/components/ui/social-icon";
 import { CreatePostDialog } from "@/components/posts/create-post-dialog";
 import { Edit, Plus, CalendarDays, List } from "lucide-react";
 import { Post, PlatformPost } from "@shared/schema";
