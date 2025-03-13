@@ -9,6 +9,7 @@ import Posts from "@/pages/posts";
 import Analytics from "@/pages/analytics";
 import Connections from "@/pages/connections";
 import Settings from "@/pages/settings";
+import PremiumFeatures from "@/pages/premium-features";
 import MainLayout from "@/layouts/main-layout";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/analytics" component={Analytics} />
       <Route path="/connections" component={Connections} />
       <Route path="/settings" component={Settings} />
+      <Route path="/premium-features" component={PremiumFeatures} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -12,7 +12,8 @@ import {
   Link2, 
   Settings,
   Menu,
-  X
+  X,
+  Sparkles
 } from "lucide-react";
 import type { SocialAccount } from "@shared/schema";
 
@@ -38,6 +39,7 @@ export function Sidebar({ className }: SidebarProps) {
     { path: "/posts", label: "Posts", icon: <Send className="mr-3 text-lg" /> },
     { path: "/analytics", label: "Analytics", icon: <BarChart className="mr-3 text-lg" /> },
     { path: "/connections", label: "Connections", icon: <Link2 className="mr-3 text-lg" /> },
+    { path: "/premium-features", label: "Premium Features", icon: <Sparkles className="mr-3 text-lg" /> },
     { path: "/settings", label: "Settings", icon: <Settings className="mr-3 text-lg" /> },
   ];
 
@@ -89,6 +91,24 @@ export function Sidebar({ className }: SidebarProps) {
                 </Link>
               ))}
             </nav>
+            
+            <div className="px-4 py-3 mx-2 mt-6 rounded-md bg-primary/20">
+              <h3 className="text-sm font-medium text-white flex items-center">
+                <Sparkles className="h-4 w-4 mr-1 text-primary" />
+                Premium Features
+              </h3>
+              <p className="text-xs text-gray-300 mt-1">
+                Unlock advanced tools to maximize your social media presence
+              </p>
+              <Button
+                size="sm"
+                className="mt-3 w-full text-xs font-medium"
+                asChild
+                onClick={toggleMobileMenu}
+              >
+                <Link href="/premium-features">Upgrade to Premium</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -118,6 +138,23 @@ export function Sidebar({ className }: SidebarProps) {
               ))}
             </nav>
             <div className="p-4 mt-6">
+              <div className="px-4 py-3 rounded-md bg-primary/20 mb-4">
+                <h3 className="text-sm font-medium text-white flex items-center">
+                  <Sparkles className="h-4 w-4 mr-1 text-primary" />
+                  Premium Features
+                </h3>
+                <p className="text-xs text-gray-300 mt-1">
+                  Unlock advanced tools to maximize your social media presence
+                </p>
+                <Button
+                  size="sm"
+                  className="mt-3 w-full text-xs font-medium"
+                  asChild
+                >
+                  <Link href="/premium-features">Upgrade to Premium</Link>
+                </Button>
+              </div>
+              
               <div className="px-4 py-3 rounded-md bg-gray-700">
                 <h3 className="text-sm font-medium text-white">Connected Accounts</h3>
                 <div className="mt-3 flex space-x-2">
