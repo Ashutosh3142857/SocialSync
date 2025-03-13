@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import {
@@ -8,6 +8,13 @@ import {
   platformSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import { WebSocketServer, WebSocket } from "ws";
+import session from "express-session";
+import passport from "passport";
+import TwitterStrategy from "passport-twitter";
+import FacebookStrategy from "passport-facebook";
+import InstagramStrategy from "passport-instagram";
+import LinkedInStrategy from "passport-linkedin-oauth2";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -373,6 +380,165 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Setup session middleware
+  app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production' }
+  }));
+
+  // Initialize passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // Serialize and deserialize user
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(async (id: number, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user || undefined);
+    } catch (error) {
+      done(error, undefined);
+    }
+  });
+
+  // OAuth routes for Twitter
+  app.get('/auth/twitter', (req, res, next) => {
+    // We would normally use passport.authenticate here but need keys first
+    res.json({ message: "Twitter OAuth requires API keys" });
+  });
+
+  app.get('/auth/twitter/callback', (req, res, next) => {
+    res.redirect('/dashboard');
+  });
+
+  // OAuth routes for Facebook
+  app.get('/auth/facebook', (req, res, next) => {
+    // We would normally use passport.authenticate here but need keys first
+    res.json({ message: "Facebook OAuth requires API keys" });
+  });
+
+  app.get('/auth/facebook/callback', (req, res, next) => {
+    res.redirect('/dashboard');
+  });
+
+  // OAuth routes for Instagram
+  app.get('/auth/instagram', (req, res, next) => {
+    // We would normally use passport.authenticate here but need keys first
+    res.json({ message: "Instagram OAuth requires API keys" });
+  });
+
+  app.get('/auth/instagram/callback', (req, res, next) => {
+    res.redirect('/dashboard');
+  });
+
+  // OAuth routes for LinkedIn
+  app.get('/auth/linkedin', (req, res, next) => {
+    // We would normally use passport.authenticate here but need keys first
+    res.json({ message: "LinkedIn OAuth requires API keys" });
+  });
+
+  app.get('/auth/linkedin/callback', (req, res, next) => {
+    res.redirect('/dashboard');
+  });
+
+  // Create HTTP server
   const httpServer = createServer(app);
+
+  // Setup WebSocket server for real-time data streaming
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  // Connected clients
+  const clients = new Set<WebSocket>();
+
+  // Handle WebSocket connections
+  wss.on('connection', (ws: WebSocket) => {
+    // Add client to the set
+    clients.add(ws);
+    console.log('New WebSocket client connected');
+
+    // Send initial data
+    ws.send(JSON.stringify({
+      type: 'connection',
+      message: 'Connected to SocialSync WebSocket server'
+    }));
+
+    // Handle messages from client
+    ws.on('message', (message: string) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Received message:', data);
+
+        // Handle different message types
+        switch (data.type) {
+          case 'subscribe':
+            // Client subscribing to updates for specific data
+            ws.send(JSON.stringify({
+              type: 'subscribed',
+              channel: data.channel,
+              message: `Successfully subscribed to ${data.channel}`
+            }));
+            break;
+
+          case 'ping':
+            // Client ping to keep connection alive
+            ws.send(JSON.stringify({
+              type: 'pong',
+              timestamp: Date.now()
+            }));
+            break;
+
+          default:
+            console.log('Unknown message type:', data.type);
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+
+    // Handle client disconnection
+    ws.on('close', () => {
+      clients.delete(ws);
+      console.log('WebSocket client disconnected');
+    });
+  });
+
+  // Function to broadcast data to all connected clients
+  const broadcastData = (data: any) => {
+    const message = JSON.stringify(data);
+    
+    clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  };
+
+  // Simulate real-time analytics updates
+  setInterval(() => {
+    // Only send if we have connected clients
+    if (clients.size > 0) {
+      const analyticsUpdate = {
+        type: 'analytics_update',
+        timestamp: Date.now(),
+        data: {
+          platform: ['twitter', 'facebook', 'instagram', 'linkedin'][Math.floor(Math.random() * 4)],
+          metrics: {
+            views: Math.floor(Math.random() * 100) + 1,
+            engagements: Math.floor(Math.random() * 50) + 1,
+            shares: Math.floor(Math.random() * 20) + 1,
+            likes: Math.floor(Math.random() * 30) + 1
+          }
+        }
+      };
+      
+      broadcastData(analyticsUpdate);
+    }
+  }, 10000); // Every 10 seconds
+
   return httpServer;
 }

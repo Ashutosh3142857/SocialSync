@@ -5,9 +5,10 @@ import { PlatformChart } from "@/components/dashboard/platform-chart";
 import { UpcomingPosts } from "@/components/dashboard/upcoming-posts";
 import { PostPerformance } from "@/components/dashboard/post-performance";
 import { QuickActions } from "@/components/dashboard/quick-actions";
+import { RealTimeAnalytics } from "@/components/dashboard/real-time-analytics";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { CreatePostDialog } from "@/components/posts/create-post-dialog";
 
