@@ -29,12 +29,15 @@ export default function Schedule() {
     return scheduledPosts.filter(post => {
       if (!post.scheduledFor) return false;
       
+      // Convert the post's scheduledFor date string to a proper Date object
       const postDate = new Date(post.scheduledFor);
-      return (
-        postDate.getDate() === date.getDate() &&
-        postDate.getMonth() === date.getMonth() &&
-        postDate.getFullYear() === date.getFullYear()
-      );
+      
+      // Extract only the date part for comparison (ignore time)
+      const postDateString = postDate.toISOString().split('T')[0];
+      const selectedDateString = date.toISOString().split('T')[0];
+      
+      // Compare just the date part
+      return postDateString === selectedDateString;
     });
   };
   
