@@ -44,21 +44,33 @@ export default function Schedule() {
   const getPostsForDate = (date: Date | undefined) => {
     if (!date) return [];
     
+    // Debug date value
+    console.log("Checking posts for date:", date, date.toDateString());
+    
     return scheduledPosts.filter(post => {
-      if (!post.scheduledFor) return false;
+      if (!post.scheduledFor) {
+        console.log("Post has no scheduled date:", post.id);
+        return false;
+      }
       
       try {
         // Convert the post's scheduledFor date string to a proper Date object
         const postDate = new Date(post.scheduledFor);
         
+        // Debug post date
+        console.log("Post ID:", post.id, "Date:", post.scheduledFor, "Parsed date:", postDate);
+        
         // Format dates to local date strings for reliable comparison
         const postDateString = postDate.toDateString();
         const selectedDateString = date.toDateString();
         
+        // Debug comparison
+        console.log(`Comparing post ${post.id} date: ${postDateString} with ${selectedDateString}, match: ${postDateString === selectedDateString}`);
+        
         // Compare just the date part
         return postDateString === selectedDateString;
       } catch (error) {
-        console.error("Error comparing dates:", error);
+        console.error("Error comparing dates for post:", post.id, error);
         return false;
       }
     });
