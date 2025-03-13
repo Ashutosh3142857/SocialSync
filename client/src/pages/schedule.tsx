@@ -141,7 +141,7 @@ export default function Schedule() {
                               <div className="ml-4 flex-1">
                                 <div className="flex justify-between">
                                   <div>
-                                    <p className="font-medium">{formatScheduleTime(post.scheduledFor)}</p>
+                                    <p className="font-medium">{post.scheduledFor ? formatScheduleTime(new Date(post.scheduledFor)) : 'Not scheduled'}</p>
                                     <p className="text-sm text-gray-500 mt-1">{post.content}</p>
                                   </div>
                                   <Button variant="ghost" size="sm">
@@ -214,14 +214,14 @@ export default function Schedule() {
                                 <div className="flex justify-between">
                                   <div>
                                     <p className="font-medium">
-                                      {post.scheduledFor?.toLocaleDateString('en-US', {
+                                      {post.scheduledFor ? new Date(post.scheduledFor).toLocaleDateString('en-US', {
                                         weekday: 'short',
                                         month: 'short',
                                         day: 'numeric',
                                         hour: 'numeric',
                                         minute: '2-digit',
                                         hour12: true
-                                      })}
+                                      }) : 'Not scheduled'}
                                     </p>
                                     <p className="text-sm text-gray-500 mt-1">{post.content}</p>
                                   </div>
