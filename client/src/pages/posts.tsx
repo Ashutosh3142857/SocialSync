@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SocialBadge } from "@/components/ui/social-icon";
+import { SocialBadge, SocialIcon } from "@/components/ui/social-icon";
 import { CreatePostDialog } from "@/components/posts/create-post-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Calendar, Clock, Edit, Trash2 } from "lucide-react";

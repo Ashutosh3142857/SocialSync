@@ -342,6 +342,57 @@ export default function Settings() {
                             <span className="text-sm font-medium">System</span>
                           </div>
                         </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                          <div>
+                            <Button 
+                              variant="outline" 
+                              className="w-full"
+                              onClick={() => setShowThemePreview(true)}
+                            >
+                              Preview Theme Before Applying
+                            </Button>
+                          </div>
+                          <div>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={handleResetTheme}
+                            >
+                              One-Click Theme Reset
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                          <h4 className="text-md font-medium mb-2">Additional Theme Options</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start"
+                              onClick={() => setShowContrastChecker(true)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" />
+                                <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                              </svg>
+                              Accessibility Color Contrast Checker
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-start"
+                              onClick={() => setShowColorPalette(true)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M14 12c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2Z" />
+                                <path d="M12 6c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6Z" />
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Z" />
+                              </svg>
+                              Custom Color Palette Generator
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     
