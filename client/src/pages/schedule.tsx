@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -8,18 +8,36 @@ import { SocialBadge, SocialIcon } from "@/components/ui/social-icon";
 import { CreatePostDialog } from "@/components/posts/create-post-dialog";
 import { Edit, Plus, CalendarDays, List } from "lucide-react";
 import { Post, PlatformPost } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface PostWithPlatforms extends Post {
   platforms: PlatformPost[];
 }
 
 export default function Schedule() {
+  const { toast } = useToast();
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
-  const { data: posts = [], isLoading } = useQuery<PostWithPlatforms[]>({
+  // Force refetch on component mount to ensure we have the latest data
+  const { data: posts = [], isLoading, refetch } = useQuery<PostWithPlatforms[]>({
     queryKey: ['/api/posts'],
   });
+  
+  // Refetch posts when component mounts or when returning to this page
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // Debug - log posts
+  useEffect(() => {
+    if (posts.length > 0) {
+      console.log("All posts:", posts);
+      console.log("Scheduled posts:", scheduledPosts);
+    }
+  }, [posts]);
   
   const scheduledPosts = posts.filter(post => post.status === "scheduled");
   
@@ -29,15 +47,20 @@ export default function Schedule() {
     return scheduledPosts.filter(post => {
       if (!post.scheduledFor) return false;
       
-      // Convert the post's scheduledFor date string to a proper Date object
-      const postDate = new Date(post.scheduledFor);
-      
-      // Extract only the date part for comparison (ignore time)
-      const postDateString = postDate.toISOString().split('T')[0];
-      const selectedDateString = date.toISOString().split('T')[0];
-      
-      // Compare just the date part
-      return postDateString === selectedDateString;
+      try {
+        // Convert the post's scheduledFor date string to a proper Date object
+        const postDate = new Date(post.scheduledFor);
+        
+        // Format dates to local date strings for reliable comparison
+        const postDateString = postDate.toDateString();
+        const selectedDateString = date.toDateString();
+        
+        // Compare just the date part
+        return postDateString === selectedDateString;
+      } catch (error) {
+        console.error("Error comparing dates:", error);
+        return false;
+      }
     });
   };
   

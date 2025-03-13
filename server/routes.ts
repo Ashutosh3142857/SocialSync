@@ -135,10 +135,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = 1; // Default user
       
+      console.log("Post creation request body:", req.body);
+      
       // Convert scheduledFor from string to Date object if it's a string
       let parsedBody = { ...req.body };
       if (typeof parsedBody.scheduledFor === 'string' && parsedBody.scheduledFor) {
         parsedBody.scheduledFor = new Date(parsedBody.scheduledFor);
+        console.log("Parsed scheduledFor date:", parsedBody.scheduledFor);
       }
       
       const { content, mediaUrls, platforms, scheduledFor } = postFormSchema.parse(parsedBody);
@@ -152,7 +155,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: scheduledFor ? "scheduled" : "draft",
       });
       
+      console.log("Creating post with data:", postData);
       const post = await storage.createPost(postData);
+      console.log("Created post:", post);
       
       // Create platform posts for each selected platform
       const platformPromises = platforms.map((platformId) => 
