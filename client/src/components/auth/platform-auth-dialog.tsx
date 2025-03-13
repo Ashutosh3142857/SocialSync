@@ -110,10 +110,10 @@ export function PlatformAuthDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            Connect to {config?.name || PLATFORMS[platform]?.name || platform}
+            Connect to {config?.name || (PLATFORMS[platform as keyof typeof PLATFORMS]?.name) || platform}
           </DialogTitle>
           <DialogDescription>
-            Enter your API keys to connect to {config?.name || PLATFORMS[platform]?.name || platform}.
+            Enter your API keys to connect to {config?.name || (PLATFORMS[platform as keyof typeof PLATFORMS]?.name) || platform}.
             These keys are used to authorize SocialSync to interact with your account.
           </DialogDescription>
         </DialogHeader>
@@ -125,7 +125,7 @@ export function PlatformAuthDialog({
               <p className="font-medium text-amber-800">Your keys are stored securely</p>
               <p className="text-amber-700 mt-1">
                 Your API keys are encrypted and stored securely. They are only used to authenticate with
-                the {config?.name} API and are never shared with third parties.
+                the {config?.name || (PLATFORMS[platform as keyof typeof PLATFORMS]?.name) || platform} API and are never shared with third parties.
               </p>
             </div>
           </div>

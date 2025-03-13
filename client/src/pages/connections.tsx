@@ -111,7 +111,14 @@ export default function Connections() {
   };
   
   const handleReconnect = (accountId: number) => {
-    reconnectMutation.mutate(accountId);
+    // Find the account to reconnect
+    const account = accounts.find(acc => acc.id === accountId);
+    if (account) {
+      // Set the platform for the auth dialog
+      setNewAccountPlatform(account.platform);
+      // Open the auth dialog
+      setIsAuthDialogOpen(true);
+    }
   };
   
   const handleAddAccount = (e: React.FormEvent) => {
@@ -358,6 +365,14 @@ export default function Connections() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Platform API Key Dialog */}
+      <PlatformAuthDialog
+        open={isAuthDialogOpen}
+        onOpenChange={setIsAuthDialogOpen}
+        platform={newAccountPlatform}
+        onSaveKeys={handleSaveApiKeys}
+      />
     </div>
   );
 }
