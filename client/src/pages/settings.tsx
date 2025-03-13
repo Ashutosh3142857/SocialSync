@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   Card, 
   CardContent, 
@@ -17,13 +17,56 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "lucide-react";
 
+type ThemeType = "light" | "dark" | "system";
+
 export default function Settings() {
   const { toast } = useToast();
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState<ThemeType>("light");
   
   const { data: user } = useQuery({
     queryKey: ['/api/user'],
   });
+  
+  // Load the theme from localStorage on component mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as ThemeType;
+    if (savedTheme) {
+      setSelectedTheme(savedTheme);
+      applyTheme(savedTheme);
+    }
+  }, []);
+  
+  // Function to apply the theme to the document
+  const applyTheme = (theme: ThemeType) => {
+    const root = window.document.documentElement;
+    
+    // Remove all previous theme classes
+    root.classList.remove('light', 'dark');
+    
+    if (theme === 'system') {
+      // Check system preference
+      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemPreference);
+    } else {
+      // Apply the selected theme
+      root.classList.add(theme);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('theme', theme);
+  };
+  
+  // Handler for theme selection
+  const handleThemeChange = (theme: ThemeType) => {
+    setSelectedTheme(theme);
+    applyTheme(theme);
+    
+    toast({
+      title: "Theme updated",
+      description: `Theme has been changed to ${theme}.`,
+    });
+  };
   
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,15 +320,24 @@ export default function Settings() {
                       <h3 className="text-lg font-medium">Appearance</h3>
                       <div className="mt-4 space-y-4">
                         <div className="grid grid-cols-3 gap-4">
-                          <div className="border rounded-md p-4 flex flex-col items-center space-y-2 bg-white cursor-pointer border-primary">
+                          <div 
+                            className={`border rounded-md p-4 flex flex-col items-center space-y-2 bg-white cursor-pointer ${selectedTheme === 'light' ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200'}`}
+                            onClick={() => handleThemeChange('light')}
+                          >
                             <div className="h-20 w-full bg-white rounded"></div>
                             <span className="text-sm font-medium">Light</span>
                           </div>
-                          <div className="border rounded-md p-4 flex flex-col items-center space-y-2 bg-gray-900 cursor-pointer">
+                          <div 
+                            className={`border rounded-md p-4 flex flex-col items-center space-y-2 bg-gray-900 cursor-pointer ${selectedTheme === 'dark' ? 'border-primary ring-2 ring-primary/20' : 'border-gray-700'}`}
+                            onClick={() => handleThemeChange('dark')}
+                          >
                             <div className="h-20 w-full bg-gray-800 rounded"></div>
                             <span className="text-sm font-medium text-white">Dark</span>
                           </div>
-                          <div className="border rounded-md p-4 flex flex-col items-center space-y-2 bg-gradient-to-b from-white to-gray-900 cursor-pointer">
+                          <div 
+                            className={`border rounded-md p-4 flex flex-col items-center space-y-2 bg-gradient-to-b from-white to-gray-900 cursor-pointer ${selectedTheme === 'system' ? 'border-primary ring-2 ring-primary/20' : 'border-gray-300'}`}
+                            onClick={() => handleThemeChange('system')}
+                          >
                             <div className="h-20 w-full bg-gradient-to-b from-white to-gray-800 rounded"></div>
                             <span className="text-sm font-medium">System</span>
                           </div>
