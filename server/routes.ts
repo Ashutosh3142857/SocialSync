@@ -135,7 +135,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = 1; // Default user
       
-      const { content, mediaUrls, platforms, scheduledFor } = postFormSchema.parse(req.body);
+      // Convert scheduledFor from string to Date object if it's a string
+      let parsedBody = { ...req.body };
+      if (typeof parsedBody.scheduledFor === 'string' && parsedBody.scheduledFor) {
+        parsedBody.scheduledFor = new Date(parsedBody.scheduledFor);
+      }
+      
+      const { content, mediaUrls, platforms, scheduledFor } = postFormSchema.parse(parsedBody);
       
       // Create the post
       const postData = insertPostSchema.parse({
