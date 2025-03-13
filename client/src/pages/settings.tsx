@@ -16,6 +16,12 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ThemePreview } from "@/components/settings/theme-preview";
+import { ThemeTransition, disableThemeTransitions } from "@/components/settings/theme-transition";
+import { ContrastChecker } from "@/components/settings/contrast-checker";
+import { ColorPaletteGenerator } from "@/components/settings/color-palette-generator";
+import { ThemeReset } from "@/components/settings/theme-reset";
 
 type ThemeType = "light" | "dark" | "system";
 
@@ -23,6 +29,17 @@ export default function Settings() {
   const { toast } = useToast();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>("light");
+  const [previewTheme, setPreviewTheme] = useState<ThemeType>("light");
+  
+  // Dialog state
+  const [showThemePreview, setShowThemePreview] = useState(false);
+  const [showContrastChecker, setShowContrastChecker] = useState(false);
+  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [showThemeReset, setShowThemeReset] = useState(false);
+  
+  // Theme configuration state
+  const [primaryColor, setPrimaryColor] = useState("#6366f1");
+  const [enableTransitions, setEnableTransitions] = useState(true);
   
   const { data: user } = useQuery({
     queryKey: ['/api/user'],
@@ -33,7 +50,20 @@ export default function Settings() {
     const savedTheme = localStorage.getItem('theme') as ThemeType;
     if (savedTheme) {
       setSelectedTheme(savedTheme);
+      setPreviewTheme(savedTheme);
       applyTheme(savedTheme);
+    }
+    
+    // Check for saved primary color
+    const savedPrimaryColor = localStorage.getItem('primaryColor');
+    if (savedPrimaryColor) {
+      setPrimaryColor(savedPrimaryColor);
+    }
+    
+    // Check if transitions are enabled
+    const transitionsEnabled = localStorage.getItem('enableTransitions');
+    if (transitionsEnabled !== null) {
+      setEnableTransitions(transitionsEnabled === 'true');
     }
   }, []);
   
@@ -41,16 +71,33 @@ export default function Settings() {
   const applyTheme = (theme: ThemeType) => {
     const root = window.document.documentElement;
     
-    // Remove all previous theme classes
-    root.classList.remove('light', 'dark');
-    
-    if (theme === 'system') {
-      // Check system preference
-      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemPreference);
+    // Use the transition disabler if transitions should be skipped
+    if (!enableTransitions) {
+      disableThemeTransitions(() => {
+        // Remove all previous theme classes
+        root.classList.remove('light', 'dark');
+        
+        if (theme === 'system') {
+          // Check system preference
+          const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          root.classList.add(systemPreference);
+        } else {
+          // Apply the selected theme
+          root.classList.add(theme);
+        }
+      });
     } else {
-      // Apply the selected theme
-      root.classList.add(theme);
+      // Remove all previous theme classes
+      root.classList.remove('light', 'dark');
+      
+      if (theme === 'system') {
+        // Check system preference
+        const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        root.classList.add(systemPreference);
+      } else {
+        // Apply the selected theme
+        root.classList.add(theme);
+      }
     }
     
     // Save to localStorage
@@ -60,11 +107,54 @@ export default function Settings() {
   // Handler for theme selection
   const handleThemeChange = (theme: ThemeType) => {
     setSelectedTheme(theme);
+    setPreviewTheme(theme);
     applyTheme(theme);
     
     toast({
       title: "Theme updated",
       description: `Theme has been changed to ${theme}.`,
+    });
+  };
+  
+  // Handler for theme preview
+  const handlePreviewTheme = (theme: ThemeType) => {
+    setPreviewTheme(theme);
+  };
+  
+  // Handler for applying previewed theme
+  const handleApplyPreviewedTheme = () => {
+    setSelectedTheme(previewTheme);
+    applyTheme(previewTheme);
+    setShowThemePreview(false);
+    
+    toast({
+      title: "Theme updated",
+      description: `Theme has been changed to ${previewTheme}.`,
+    });
+  };
+  
+  // Handler for resetting theme to default
+  const handleResetTheme = () => {
+    const defaultTheme: ThemeType = "light";
+    const defaultPrimaryColor = "#6366f1";
+    
+    // Reset all theme settings
+    setSelectedTheme(defaultTheme);
+    setPreviewTheme(defaultTheme);
+    setPrimaryColor(defaultPrimaryColor);
+    setEnableTransitions(true);
+    
+    // Apply default theme
+    applyTheme(defaultTheme);
+    
+    // Reset local storage
+    localStorage.setItem('theme', defaultTheme);
+    localStorage.setItem('primaryColor', defaultPrimaryColor);
+    localStorage.setItem('enableTransitions', 'true');
+    
+    toast({
+      title: "Theme reset",
+      description: "Theme settings have been reset to default values.",
     });
   };
   
@@ -93,18 +183,78 @@ export default function Settings() {
   };
 
   return (
-    <div className="py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
-        
-        <div className="mt-6">
-          <Tabs defaultValue="profile">
-            <TabsList className="mb-6">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="password">Password</TabsTrigger>
-              <TabsTrigger value="notifications">Notifications</TabsTrigger>
-              <TabsTrigger value="preferences">Preferences</TabsTrigger>
-            </TabsList>
+    <ThemeTransition>
+      <div className="py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
+          
+          <div className="mt-6">
+            <Tabs defaultValue="profile">
+              <TabsList className="mb-6">
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger value="password">Password</TabsTrigger>
+                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsTrigger value="preferences">Preferences</TabsTrigger>
+              </TabsList>
+              
+              {/* Theme Preview Dialog */}
+              <Dialog open={showThemePreview} onOpenChange={setShowThemePreview}>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Theme Preview</DialogTitle>
+                    <DialogDescription>
+                      Preview how your theme will look before applying it
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ThemePreview 
+                    theme={previewTheme} 
+                    onApply={handleApplyPreviewedTheme} 
+                    onCancel={() => setShowThemePreview(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+              
+              {/* Contrast Checker Dialog */}
+              <Dialog open={showContrastChecker} onOpenChange={setShowContrastChecker}>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Accessibility Contrast Checker</DialogTitle>
+                    <DialogDescription>
+                      Check if your color scheme meets accessibility standards
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ContrastChecker 
+                    primaryColor={primaryColor} 
+                    backgroundColor={selectedTheme === 'dark' ? '#171717' : '#ffffff'} 
+                  />
+                </DialogContent>
+              </Dialog>
+              
+              {/* Color Palette Generator Dialog */}
+              <Dialog open={showColorPalette} onOpenChange={setShowColorPalette}>
+                <DialogContent className="sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Custom Color Palette Generator</DialogTitle>
+                    <DialogDescription>
+                      Create and customize a color palette for your theme
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ColorPaletteGenerator />
+                </DialogContent>
+              </Dialog>
+              
+              {/* Theme Reset Dialog */}
+              <Dialog open={showThemeReset} onOpenChange={setShowThemeReset}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Reset Theme</DialogTitle>
+                    <DialogDescription>
+                      This will reset all theme customizations to default settings
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ThemeReset onReset={handleResetTheme} />
+                </DialogContent>
+              </Dialog>
             
             <TabsContent value="profile">
               <Card>
@@ -343,6 +493,27 @@ export default function Settings() {
                           </div>
                         </div>
                         
+                        <div className="flex items-center justify-between mt-6">
+                          <div>
+                            <Label htmlFor="enable-transitions">Smooth Theme Transitions</Label>
+                            <p className="text-sm text-gray-500">Enable smooth animations when changing themes</p>
+                          </div>
+                          <Switch 
+                            id="enable-transitions" 
+                            checked={enableTransitions}
+                            onCheckedChange={(checked) => {
+                              setEnableTransitions(checked);
+                              localStorage.setItem('enableTransitions', checked.toString());
+                              toast({
+                                title: checked ? "Transitions enabled" : "Transitions disabled",
+                                description: checked 
+                                  ? "Theme changes will now animate smoothly" 
+                                  : "Theme changes will now happen instantly",
+                              });
+                            }}
+                          />
+                        </div>
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                           <div>
                             <Button 
@@ -357,7 +528,7 @@ export default function Settings() {
                             <Button 
                               variant="outline"
                               className="w-full"
-                              onClick={handleResetTheme}
+                              onClick={() => setShowThemeReset(true)}
                             >
                               One-Click Theme Reset
                             </Button>
@@ -451,5 +622,6 @@ export default function Settings() {
         </div>
       </div>
     </div>
+  </ThemeTransition>
   );
 }
