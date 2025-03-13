@@ -93,6 +93,13 @@ export default function Dashboard() {
           </div>
         </div>
         
+        {/* Real-time Analytics */}
+        <div className="mt-8">
+          <div className="grid grid-cols-1 gap-5">
+            <RealTimeAnalytics />
+          </div>
+        </div>
+        
         {/* Upcoming Posts */}
         <div className="mt-8">
           <UpcomingPosts />
