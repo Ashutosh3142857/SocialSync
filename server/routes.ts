@@ -140,8 +140,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert scheduledFor from string to Date object if it's a string
       let parsedBody = { ...req.body };
       if (typeof parsedBody.scheduledFor === 'string' && parsedBody.scheduledFor) {
-        parsedBody.scheduledFor = new Date(parsedBody.scheduledFor);
+        // Create a date object and ensure it's valid
+        const scheduledDate = new Date(parsedBody.scheduledFor);
+        
+        // Check if the date is valid
+        if (isNaN(scheduledDate.getTime())) {
+          console.error("Invalid date format received:", parsedBody.scheduledFor);
+          return res.status(400).json({ message: "Invalid date format" });
+        }
+        
+        parsedBody.scheduledFor = scheduledDate;
         console.log("Parsed scheduledFor date:", parsedBody.scheduledFor);
+        console.log("Date components:", {
+          year: scheduledDate.getFullYear(),
+          month: scheduledDate.getMonth(),
+          day: scheduledDate.getDate(),
+          hours: scheduledDate.getHours(),
+          minutes: scheduledDate.getMinutes()
+        });
       }
       
       const { content, mediaUrls, platforms, scheduledFor } = postFormSchema.parse(parsedBody);
@@ -158,6 +174,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating post with data:", postData);
       const post = await storage.createPost(postData);
       console.log("Created post:", post);
+      console.log("Post scheduledFor:", post.scheduledFor);
+      if (post.scheduledFor) {
+        console.log("Post scheduledFor type:", typeof post.scheduledFor);
+        if (post.scheduledFor instanceof Date) {
+          console.log("Date components:", {
+            year: post.scheduledFor.getFullYear(),
+            month: post.scheduledFor.getMonth(),
+            day: post.scheduledFor.getDate(),
+            hours: post.scheduledFor.getHours(),
+            minutes: post.scheduledFor.getMinutes()
+          });
+        }
+      }
       
       // Create platform posts for each selected platform
       const platformPromises = platforms.map((platformId) => 

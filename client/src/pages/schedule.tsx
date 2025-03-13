@@ -41,11 +41,45 @@ export default function Schedule() {
   
   const scheduledPosts = posts.filter(post => post.status === "scheduled");
   
+  const isSameDay = (date1: Date | string | null, date2: Date | string | null) => {
+    if (!date1 || !date2) return false;
+    
+    try {
+      // Ensure both dates are Date objects
+      const d1 = date1 instanceof Date ? date1 : new Date(date1);
+      const d2 = date2 instanceof Date ? date2 : new Date(date2);
+      
+      // Compare year, month, and day
+      return (
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate()
+      );
+    } catch (error) {
+      console.error("Error comparing dates:", error);
+      return false;
+    }
+  };
+  
   const getPostsForDate = (date: Date | undefined) => {
     if (!date) return [];
     
     // Debug date value
-    console.log("Checking posts for date:", date, date.toDateString());
+    console.log("Checking posts for date:", date);
+    console.log("Selected date components:", {
+      year: date.getFullYear(),
+      month: date.getMonth(),
+      day: date.getDate()
+    });
+    
+    // Log all scheduled posts
+    console.log("All scheduled posts:", scheduledPosts.map(post => ({
+      id: post.id,
+      content: post.content.substring(0, 20) + "...",
+      scheduledFor: post.scheduledFor,
+      dateObj: post.scheduledFor ? new Date(post.scheduledFor) : null,
+      status: post.status
+    })));
     
     return scheduledPosts.filter(post => {
       if (!post.scheduledFor) {
@@ -53,26 +87,12 @@ export default function Schedule() {
         return false;
       }
       
-      try {
-        // Convert the post's scheduledFor date string to a proper Date object
-        const postDate = new Date(post.scheduledFor);
-        
-        // Debug post date
-        console.log("Post ID:", post.id, "Date:", post.scheduledFor, "Parsed date:", postDate);
-        
-        // Format dates to local date strings for reliable comparison
-        const postDateString = postDate.toDateString();
-        const selectedDateString = date.toDateString();
-        
-        // Debug comparison
-        console.log(`Comparing post ${post.id} date: ${postDateString} with ${selectedDateString}, match: ${postDateString === selectedDateString}`);
-        
-        // Compare just the date part
-        return postDateString === selectedDateString;
-      } catch (error) {
-        console.error("Error comparing dates for post:", post.id, error);
-        return false;
-      }
+      const isMatch = isSameDay(post.scheduledFor, date);
+      
+      // Debug the match result
+      console.log(`Post ${post.id} match for ${date.toDateString()}: ${isMatch}`);
+      
+      return isMatch;
     });
   };
   
